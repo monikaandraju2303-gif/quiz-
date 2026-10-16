@@ -924,8 +924,12 @@ app.post('/api/export-results-csv', (req: express.Request, res: express.Response
     ];
 
     const escapeCsv = (str: any) => {
-      const val = String(str ?? '');
-      if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+      let val = String(str ?? '');
+      // Prevent spreadsheet formula injection (=, +, -, @, \t, \r)
+      if (/^[=+\-@\t\r]/.test(val)) {
+        val = `'${val}`;
+      }
+      if (val.includes(',') || val.includes('"') || val.includes('\n') || val.includes('\r')) {
         return `"${val.replace(/"/g, '""')}"`;
       }
       return val;
