@@ -16,12 +16,14 @@ import {
   ChevronRight,
   Sparkles,
   XCircle,
+  Paperclip,
+  FileText,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { quizzesService } from '../services/quizzesService';
 import { attemptsService } from '../services/attemptsService';
 import { api } from '../services/api';
-import { Quiz, QuizAttempt, QuizQuestion, StudentAnswer } from '../types';
+import { Quiz, QuizAttempt, QuizQuestion, StudentAnswer, AttachmentItem } from '../types';
 import { Modal } from '../components/common/Modal';
 
 interface QuizAttemptPageProps {
@@ -62,6 +64,7 @@ export const QuizAttemptPage: React.FC<QuizAttemptPageProps> = ({ quizId, onNavi
 
   // Submit confirmation modal
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [showAttachmentsModal, setShowAttachmentsModal] = useState(false);
 
   useEffect(() => {
     loadQuiz();
@@ -312,26 +315,41 @@ export const QuizAttemptPage: React.FC<QuizAttemptPageProps> = ({ quizId, onNavi
               </p>
             </div>
 
-            {/* Timer countdown if time limit active */}
-            {quiz.timeLimit && (
-              <div
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-mono text-xs font-extrabold ${
-                  secondsRemaining < 120
-                    ? 'bg-rose-100 text-rose-800 animate-pulse'
-                    : 'bg-stone-100 text-stone-800'
-                }`}
-              >
-                <Clock className="w-3.5 h-3.5" />
-                <span>{formatTime(secondsRemaining)}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {/* Reference Sheet / Attachments toggle */}
+              {((quiz.attachments && quiz.attachments.length > 0) || quiz.allowReferenceSheet) && (
+                <button
+                  type="button"
+                  onClick={() => setShowAttachmentsModal(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold transition-colors shadow-2xs"
+                  title="View Attached Reference Sheet & Formulas"
+                >
+                  <Paperclip className="w-3.5 h-3.5 text-amber-700" />
+                  <span>Reference Sheet</span>
+                </button>
+              )}
 
-            <button
-              onClick={() => setConfirmModalOpen(true)}
-              className="px-4 py-1.5 bg-[#1B2A4A] text-white text-xs font-bold rounded-xl hover:bg-[#15223c] transition-colors shadow-2xs"
-            >
-              Submit Quiz
-            </button>
+              {/* Timer countdown if time limit active */}
+              {quiz.timeLimit && (
+                <div
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-mono text-xs font-extrabold ${
+                    secondsRemaining < 120
+                      ? 'bg-rose-100 text-rose-800 animate-pulse'
+                      : 'bg-stone-100 text-stone-800'
+                  }`}
+                >
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>{formatTime(secondsRemaining)}</span>
+                </div>
+              )}
+
+              <button
+                onClick={() => setConfirmModalOpen(true)}
+                className="px-4 py-1.5 bg-[#1B2A4A] text-white text-xs font-bold rounded-xl hover:bg-[#15223c] transition-colors shadow-2xs"
+              >
+                Submit Quiz
+              </button>
+            </div>
           </div>
 
           {/* Question Navigator Dots */}
@@ -639,6 +657,46 @@ export const QuizAttemptPage: React.FC<QuizAttemptPageProps> = ({ quizId, onNavi
               {submitting ? 'Grading...' : 'Confirm Submission'}
             </button>
           </div>
+        </div>
+      </Modal>
+
+      {/* Reference Sheet & Formula Attachments Modal */}
+      <Modal
+        isOpen={showAttachmentsModal}
+        onClose={() => setShowAttachmentsModal(false)}
+        title="Attached Reference Sheet & Formulas"
+        subtitle={quiz.title}
+        maxWidth="3xl"
+      >
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+          {quiz.attachments && quiz.attachments.length > 0 ? (
+            quiz.attachments.map((att, idx) => (
+              <div key={idx} className="p-4 rounded-xl bg-stone-50 border border-stone-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
+                    <FileText className="w-4 h-4 text-amber-700" />
+                    <span>{att.name}</span>
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-white text-stone-600 border border-stone-200">
+                    {att.type.replace('_', ' ')}
+                  </span>
+                </div>
+                <div className="p-3 bg-white rounded-lg border border-stone-200 font-mono text-xs text-stone-800 whitespace-pre-wrap leading-relaxed">
+                  {att.content}
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-xs text-stone-500">No reference sheets attached to this assessment.</p>
+          )}
+        </div>
+        <div className="pt-4 border-t border-stone-100 flex justify-end">
+          <button
+            onClick={() => setShowAttachmentsModal(false)}
+            className="px-4 py-2 bg-[#1B2A4A] text-white text-xs font-bold rounded-xl"
+          >
+            Return to Questions
+          </button>
         </div>
       </Modal>
     </div>

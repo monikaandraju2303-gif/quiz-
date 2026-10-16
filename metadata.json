@@ -1,6 +1,6 @@
 {
   "name": "EduQuiz AI",
-  "description": "Full-Stack Education Quiz Generator - Turn classroom notes, PDFs, and study materials into interactive quizzes with AI.",
+  "description": "Full-Stack Manual Quiz Generator & Assessment Studio - Bulk import question banks from folders, test data diagnostics, and student evaluations.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

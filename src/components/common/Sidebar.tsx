@@ -3,7 +3,8 @@ import {
   LayoutDashboard,
   Users,
   FileText,
-  Sparkles,
+  FolderUp,
+  FlaskConical,
   CheckSquare,
   BarChart3,
   Award,
@@ -45,10 +46,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'classes', label: 'My Classes', icon: Users },
     { id: 'materials', label: 'Study Materials', icon: FileText },
-    { id: 'quiz-generator', label: 'AI Quiz Generator', icon: Sparkles, badge: 'AI' },
+    { id: 'quiz-generator', label: 'Quiz Creator & Import', icon: FolderUp, badge: 'FOLDER' },
     { id: 'quizzes', label: 'My Quizzes', icon: CheckSquare },
     { id: 'results', label: 'Student Results', icon: Award },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'test-data', label: 'Test & Diagnostics', icon: FlaskConical, badge: 'TEST' },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -59,6 +61,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'student-practice', label: 'Practice Mode', icon: Compass },
     { id: 'student-results', label: 'My Results', icon: Award },
     { id: 'student-progress', label: 'Progress & Stats', icon: BarChart3 },
+    { id: 'test-data', label: 'Test & Diagnostics', icon: FlaskConical, badge: 'TEST' },
     { id: 'settings', label: 'Profile & Settings', icon: Settings },
   ];
 
@@ -100,11 +103,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   EduQuiz
                 </span>
                 <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.2 bg-amber-500/15 text-amber-800 rounded border border-amber-300/40">
-                  AI
+                  STUDIO
                 </span>
               </div>
               <p className="text-[11px] text-stone-500 font-medium leading-none mt-0.5">
-                Notes into Knowledge
+                Quiz Creator & Assessment Platform
               </p>
             </div>
           </div>

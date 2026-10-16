@@ -1,17 +1,18 @@
 import React from 'react';
 import {
   GraduationCap,
-  Sparkles,
+  FolderUp,
   FileText,
   CheckCircle2,
   BarChart3,
   ArrowRight,
   ShieldCheck,
   BookOpen,
-  BrainCircuit,
+  FlaskConical,
   Clock,
   Layers,
   Award,
+  Database,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -69,20 +70,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       <section className="relative pt-16 pb-20 px-6 overflow-hidden academic-grid">
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-100/70 border border-amber-300/60 text-amber-900 text-xs font-bold uppercase tracking-wider mb-6">
-            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-            Classroom-Focused AI Assessment Platform
+            <FolderUp className="w-3.5 h-3.5 text-amber-600" />
+            Full-Stack Manual Quiz Generator & Folder Import Studio
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-stone-900 tracking-tight leading-[1.15] mb-6">
-            Turn Your Notes Into <br />
+            Turn Question Folders Into <br />
             <span className="text-[#1B2A4A] underline decoration-amber-400 decoration-wavy decoration-2">
               Interactive Quizzes
             </span>
           </h1>
 
           <p className="text-base sm:text-lg text-stone-600 max-w-2xl mx-auto mb-8 leading-relaxed font-normal">
-            Save hours of preparation. Transform classroom notes, PDFs, DOCX files, and study
-            guides into pedagogically verified quizzes with full explanations and server-side grading.
+            Author customized assessments manually or import full question bank folders (JSON, CSV, Aiken, Markdown) with immediate server-side scoring, printable exam worksheets, and full test data diagnostics.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-12">
@@ -108,12 +108,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               Role-Based Access Control
             </span>
             <span className="flex items-center gap-1.5">
-              <BrainCircuit className="w-4 h-4 text-blue-600" />
-              Gemini 3.8 Flash Powered
+              <FolderUp className="w-4 h-4 text-blue-600" />
+              Folder Question Banks (JSON, CSV, Aiken)
             </span>
             <span className="flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-amber-600" />
-              Instant PDF & DOCX Extraction
+              <FlaskConical className="w-4 h-4 text-amber-600" />
+              Integrated Test Data Studio
             </span>
           </div>
         </div>
@@ -184,10 +184,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               <div className="w-8 h-8 rounded-lg bg-[#1B2A4A] text-amber-300 font-extrabold flex items-center justify-center text-sm mb-4">
                 2
               </div>
-              <h3 className="text-base font-bold text-stone-900 mb-2">Configure & Generate</h3>
+              <h3 className="text-base font-bold text-stone-900 mb-2">Import Folder or Craft Manually</h3>
               <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-                Select question count, difficulty level, and types. Gemini generates
-                factually grounded questions with explanations.
+                Select an entire folder of question banks (JSON, CSV, Aiken text) or craft customized questions with rich options, answers, and explanations.
               </p>
             </div>
 
@@ -195,10 +194,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               <div className="w-8 h-8 rounded-lg bg-[#1B2A4A] text-amber-300 font-extrabold flex items-center justify-center text-sm mb-4">
                 3
               </div>
-              <h3 className="text-base font-bold text-stone-900 mb-2">Review & Publish</h3>
+              <h3 className="text-base font-bold text-stone-900 mb-2">Test & Publish to Class</h3>
               <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-                Fine-tune any question or regenerate individual items. Assign to your classroom
-                and track student analytics in real time.
+                Run automated diagnostics or test-drive questions. Assign directly to your enrolled students or export print-ready worksheets.
               </p>
             </div>
           </div>
@@ -307,7 +305,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           </div>
 
           <div className="flex items-center gap-6">
-            <span>Powered by Gemini & Firebase</span>
+            <span>Powered by Full-Stack Engine & Firestore</span>
             <span>•</span>
             <button onClick={useDemoTeacher} className="hover:text-stone-900">
               Teacher Demo

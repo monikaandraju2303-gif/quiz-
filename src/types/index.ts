@@ -25,6 +25,15 @@ export interface Classroom {
   createdAt: string;
 }
 
+export interface AttachmentItem {
+  id: string;
+  name: string;
+  type: 'formula_sheet' | 'reading_excerpt' | 'diagram' | 'guide';
+  content: string;
+  size?: string;
+  dateAdded?: string;
+}
+
 export interface StudyMaterial {
   id: string;
   ownerId: string;
@@ -36,6 +45,7 @@ export interface StudyMaterial {
   storagePath?: string;
   extractedText: string;
   wordCount?: number;
+  attachments?: AttachmentItem[];
   processingStatus: 'processing' | 'completed' | 'failed';
   createdAt: string;
   updatedAt: string;
@@ -70,6 +80,8 @@ export interface Quiz {
   classId?: string;
   className?: string;
   materialIds?: string[];
+  attachments?: AttachmentItem[];
+  allowReferenceSheet?: boolean;
   title: string;
   subject: string;
   topic: string;
@@ -90,9 +102,11 @@ export interface Quiz {
 export interface StudentAnswer {
   questionId: string;
   studentAnswer: string;
+  correctAnswer?: string;
   isCorrect?: boolean;
   marksAwarded?: number;
   maxMarks?: number;
+  explanation?: string;
   feedback?: string;
 }
 

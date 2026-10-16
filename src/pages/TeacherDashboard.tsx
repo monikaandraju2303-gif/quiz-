@@ -3,7 +3,8 @@ import {
   Users,
   CheckSquare,
   Award,
-  Sparkles,
+  FolderUp,
+  FlaskConical,
   BookOpen,
   Plus,
   ArrowRight,
@@ -12,6 +13,11 @@ import {
   Calendar,
   Layers,
   ChevronRight,
+  FileText,
+  Database,
+  RotateCcw,
+  Check,
+  Paperclip,
 } from 'lucide-react';
 import {
   BarChart,
@@ -29,6 +35,8 @@ import { useAuth } from '../context/AuthContext';
 import { classesService } from '../services/classesService';
 import { quizzesService } from '../services/quizzesService';
 import { attemptsService } from '../services/attemptsService';
+import { seedService } from '../services/seedService';
+import { localAcademicStore } from '../services/localAcademicStore';
 import { Classroom, Quiz, QuizAttempt } from '../types';
 import { StatsCard } from '../components/common/StatsCard';
 import { EmptyState } from '../components/common/EmptyState';
@@ -43,6 +51,8 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onNavigate }
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [submissions, setSubmissions] = useState<QuizAttempt[]>([]);
   const [loading, setLoading] = useState(true);
+  const [seeding, setSeeding] = useState(false);
+  const [seedSuccess, setSeedSuccess] = useState(false);
 
   const teacherId = userProfile?.uid || 'demo_teacher_42';
 
@@ -70,6 +80,23 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onNavigate }
       console.error('Error loading dashboard data:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSeedSampleData = async () => {
+    setSeeding(true);
+    try {
+      await seedService.seedInitialData(teacherId, userProfile?.displayName || 'Prof. Eleanor Vance');
+      localAcademicStore.resetDefaults();
+      setSeedSuccess(true);
+      await loadDashboardData();
+      setTimeout(() => setSeedSuccess(false), 3000);
+    } catch (err: any) {
+      console.warn('Seeding failed, using local store defaults:', err);
+      localAcademicStore.resetDefaults();
+      await loadDashboardData();
+    } finally {
+      setSeeding(false);
     }
   };
 
@@ -120,32 +147,64 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onNavigate }
     <div className="space-y-8">
       {/* Classroom Chalkboard Banner */}
       <div className="chalkboard-card rounded-2xl p-6 sm:p-7 relative overflow-hidden shadow-sm">
-        <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/80 text-emerald-300 text-xs font-semibold mb-3 border border-emerald-800">
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            Classroom AI Assistant Active
+        <div className="relative z-10 max-w-3xl">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/80 text-emerald-300 text-xs font-semibold border border-emerald-800">
+              <FolderUp className="w-3.5 h-3.5 text-amber-300" />
+              <span>Full-Stack Manual Quiz Engine</span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-950/80 text-blue-300 text-xs font-semibold border border-blue-800">
+              <Database className="w-3.5 h-3.5 text-blue-400" />
+              <span>Cloud Firestore: Connected</span>
+            </div>
+            {totalClasses === 0 && (
+              <span className="text-[11px] text-amber-300 font-medium bg-amber-950/60 border border-amber-800/80 px-2.5 py-0.5 rounded-full">
+                New Session
+              </span>
+            )}
           </div>
+
           <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-            Turn Classroom Notes into Evaluated Quizzes
+            Manual Quiz Studio & Folder Question Importer
           </h2>
           <p className="text-stone-300 text-xs sm:text-sm mt-1.5 leading-relaxed">
-            Upload course slides, syllabus, or lecture PDFs. EduQuiz AI will extract key concepts,
-            formulate curriculum-aligned questions, and provide immediate grading.
+            Author customized quiz questions or bulk-import question banks directly from folders (JSON, CSV, Aiken, Markdown). Test your quizzes and student attempts with full diagnostic control.
           </p>
 
-          <div className="mt-5 flex flex-wrap gap-3">
+          <div className="mt-5 flex flex-wrap gap-3 items-center">
             <button
               onClick={() => onNavigate('quiz-generator')}
               className="px-4 py-2 bg-amber-400 text-stone-900 font-bold text-xs sm:text-sm rounded-xl hover:bg-amber-300 transition-colors shadow-sm flex items-center gap-2"
             >
-              <Sparkles className="w-4 h-4 text-stone-900" />
-              <span>Launch Quiz Generator</span>
+              <FolderUp className="w-4 h-4 text-stone-900" />
+              <span>Create / Import Quiz</span>
             </button>
             <button
-              onClick={() => onNavigate('materials')}
-              className="px-4 py-2 bg-stone-800/80 text-stone-200 font-semibold text-xs sm:text-sm rounded-xl hover:bg-stone-700/80 transition-colors border border-stone-600/60"
+              onClick={() => onNavigate('test-data')}
+              className="px-4 py-2 bg-stone-800/80 text-stone-200 font-semibold text-xs sm:text-sm rounded-xl hover:bg-stone-700/80 transition-colors border border-stone-600/60 flex items-center gap-1.5"
             >
-              Upload Notes
+              <FlaskConical className="w-3.5 h-3.5 text-amber-300" />
+              <span>Test Data Studio</span>
+            </button>
+            <button
+              onClick={handleSeedSampleData}
+              disabled={seeding}
+              className="px-3.5 py-2 bg-emerald-900/60 hover:bg-emerald-800/70 text-emerald-200 font-semibold text-xs rounded-xl transition-colors border border-emerald-700/70 flex items-center gap-1.5"
+              title="Populate realistic sample classes, materials, and quizzes for instant testing"
+            >
+              {seeding ? (
+                <span>Seeding Database...</span>
+              ) : seedSuccess ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Classroom Seeded!</span>
+                </>
+              ) : (
+                <>
+                  <RotateCcw className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Quick Seed Test Data</span>
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -227,10 +286,10 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onNavigate }
             className="p-3.5 rounded-xl border border-stone-200 hover:border-emerald-300 hover:bg-emerald-50/40 text-left transition-all group"
           >
             <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-              <Sparkles className="w-4 h-4" />
+              <FolderUp className="w-4 h-4" />
             </div>
-            <p className="text-xs font-bold text-stone-900">AI Quiz Generator</p>
-            <p className="text-[11px] text-stone-500 mt-0.5">Build from notes</p>
+            <p className="text-xs font-bold text-stone-900">Quiz Creator & Import</p>
+            <p className="text-[11px] text-stone-500 mt-0.5">Folder & Manual Builder</p>
           </button>
 
           <button
@@ -422,8 +481,8 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({ onNavigate }
             <EmptyState
               icon={CheckSquare}
               title="No quizzes yet"
-              description="Upload your classroom notes or syllabus to generate your first AI quiz."
-              actionText="Generate First Quiz"
+              description="Craft customized questions manually or import an entire question bank folder."
+              actionText="Create or Import Quiz"
               onAction={() => onNavigate('quiz-generator')}
             />
           )}

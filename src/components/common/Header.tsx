@@ -91,8 +91,8 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileMenu, onNavigate }) 
           </div>
         </div>
 
-        {/* Middle: Search bar */}
-        <div className="hidden lg:flex items-center flex-1 max-w-md mx-4">
+        {/* Middle: Search bar & Database status */}
+        <div className="hidden lg:flex items-center flex-1 max-w-md mx-4 gap-2">
           <div className="relative w-full">
             <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
@@ -102,6 +102,13 @@ export const Header: React.FC<HeaderProps> = ({ onOpenMobileMenu, onNavigate }) 
               placeholder={isTeacher ? "Search quizzes, classes, notes..." : "Search available quizzes & classes..."}
               className="w-full pl-9 pr-4 py-1.5 text-sm bg-white border border-stone-200 rounded-lg placeholder-stone-400 text-stone-700 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all shadow-2xs"
             />
+          </div>
+          <div
+            className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-200/60 text-[11px] font-semibold shrink-0"
+            title="Firestore Database: ai-studio-eduquizai-3d2010d2-5139-47eb-89d9-be3ba0b7ffb2"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>DB Online</span>
           </div>
         </div>
 

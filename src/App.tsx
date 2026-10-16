@@ -15,6 +15,7 @@ import { StudentDashboard } from './pages/StudentDashboard';
 import { StudentClassesPage } from './pages/StudentClassesPage';
 import { AvailableQuizzesPage } from './pages/AvailableQuizzesPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { TestDataPage } from './pages/TestDataPage';
 import { GraduationCap } from 'lucide-react';
 
 function MainApp() {
@@ -102,6 +103,7 @@ function MainApp() {
           {currentPage === 'student-progress' && <AnalyticsPage />}
 
           {/* SHARED ROUTES */}
+          {currentPage === 'test-data' && <TestDataPage onNavigate={handleNavigate} />}
           {currentPage === 'settings' && <SettingsPage />}
           {currentPage === 'quiz-attempt' && (
             <QuizAttemptPage quizId={pageParams?.quizId || ''} onNavigate={handleNavigate} />

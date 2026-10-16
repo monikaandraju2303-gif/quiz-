@@ -3,8 +3,9 @@
 @layer base {
   :root {
     --bg-ivory: #FBF9F5;
-    --paper-line: rgba(59, 130, 246, 0.05);
+    --paper-line: rgba(59, 130, 246, 0.06);
     --paper-grid: rgba(30, 41, 59, 0.035);
+    --margin-line: rgba(239, 68, 68, 0.15);
   }
 
   body {
@@ -23,25 +24,46 @@
   background-size: 24px 24px;
 }
 
-/* Subtle ruled notebook lines */
+/* Notebook lined paper with classic left margin */
+.notebook-page {
+  background-color: #FFFFFF;
+  background-image: 
+    linear-gradient(90deg, transparent 52px, var(--margin-line) 52px, var(--margin-line) 54px, transparent 54px),
+    linear-gradient(transparent 95%, var(--paper-line) 95%);
+  background-size: 100% 100%, 100% 28px;
+  line-height: 28px;
+}
+
+/* Ruled paper texture */
 .ruled-paper {
   background-image: linear-gradient(transparent 95%, var(--paper-line) 95%);
   background-size: 100% 28px;
   line-height: 28px;
 }
 
-/* Subtle chalkboard card style */
+/* Authentic classroom chalkboard styling */
 .chalkboard-card {
-  background-color: #1A2F2B;
-  color: #F1F5F9;
-  border: 1px solid #284E46;
+  background: linear-gradient(135deg, #18312B 0%, #11241F 100%);
+  color: #F8FAFC;
+  border: 2px solid #23483E;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 
-/* Academic card styling */
+.chalkboard-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 0);
+  background-size: 8px 8px;
+  pointer-events: none;
+}
+
+/* Academic card styling with soft paper shadow */
 .edu-card {
   background: #FFFFFF;
   border: 1px solid #E2E8F0;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.03), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
 }
 
 .edu-card-hover {
@@ -49,8 +71,93 @@
 }
 .edu-card-hover:hover {
   border-color: #CBD5E1;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
-  transform: translateY(-1px);
+  box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.06), 0 3px 6px -3px rgba(0, 0, 0, 0.04);
+  transform: translateY(-1.5px);
+}
+
+/* Academic certificate seal effect */
+.academic-seal {
+  position: relative;
+  border: 3px double #D97706;
+  border-radius: 9999px;
+  background: radial-gradient(circle, #FEF3C7 0%, #FDE68A 100%);
+  color: #78350F;
+  box-shadow: 0 4px 10px rgba(217, 119, 6, 0.2);
+}
+
+/* Authentic classroom chalkboard slate with chalk dust */
+.chalkboard-slate {
+  background: linear-gradient(135deg, #182C25 0%, #0F1F1A 100%);
+  color: #F8FAFC;
+  border: 1px solid #28443A;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+.chalkboard-slate::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 12px 12px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Classic yellow classroom post-it note */
+.postit-note {
+  background-color: #FEF9C3;
+  color: #713F12;
+  border: 1px solid #FDE047;
+  box-shadow: 2px 3px 8px -2px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+.postit-note::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 14px;
+  background-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-left: 1px dashed rgba(200, 200, 200, 0.5);
+  border-right: 1px dashed rgba(200, 200, 200, 0.5);
+}
+
+/* Academic rubber stamp effect */
+.academic-stamp {
+  display: inline-block;
+  padding: 4px 10px;
+  text-transform: uppercase;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  border-radius: 4px;
+  border: 2px solid currentColor;
+  transform: rotate(-3deg);
+  mask-image: linear-gradient(rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.85));
+}
+
+.academic-stamp-success {
+  color: #047857;
+  border-color: #059669;
+  background-color: rgba(16, 185, 129, 0.08);
+}
+
+.academic-stamp-review {
+  color: #B45309;
+  border-color: #D97706;
+  background-color: rgba(245, 158, 11, 0.08);
+}
+
+/* Notebook left margin vertical rule */
+.notebook-margin-card {
+  position: relative;
+  border-left: 4px solid #F87171;
+  background-color: #FFFFFF;
 }
 
 /* Custom scrollbars */

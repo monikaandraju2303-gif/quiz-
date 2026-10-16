@@ -14,12 +14,17 @@ import {
   Clock,
   Award,
   Layers,
-  Sparkles,
+  FolderUp,
   Calendar,
+  Printer,
+  Paperclip,
+  Download,
+  FileText,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { quizzesService } from '../services/quizzesService';
 import { classesService } from '../services/classesService';
+import { api } from '../services/api';
 import { Classroom, Quiz, QuizDifficulty, QuizStatus } from '../types';
 import { EmptyState } from '../components/common/EmptyState';
 import { Modal } from '../components/common/Modal';
@@ -47,6 +52,10 @@ export const MyQuizzesPage: React.FC<MyQuizzesPageProps> = ({ onNavigate }) => {
 
   // Preview modal
   const [previewQuiz, setPreviewQuiz] = useState<Quiz | null>(null);
+
+  // Print worksheet modal
+  const [printHtml, setPrintHtml] = useState<string | null>(null);
+  const [printingQuiz, setPrintingQuiz] = useState<Quiz | null>(null);
 
   const teacherId = userProfile?.uid || 'demo_teacher_42';
 
@@ -99,6 +108,35 @@ export const MyQuizzesPage: React.FC<MyQuizzesPageProps> = ({ onNavigate }) => {
     }
   };
 
+  const handlePrintPaper = async (quiz: Quiz) => {
+    try {
+      const html = await api.exportExamPaper(quiz, userProfile?.schoolOrOrg || 'Oakridge Academy', true);
+      setPrintHtml(html);
+      setPrintingQuiz(quiz);
+    } catch (err: any) {
+      console.error('Failed to generate printable exam:', err);
+    }
+  };
+
+  const handleExportQuizJson = (quiz: Quiz) => {
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(quiz, null, 2));
+    const dlAnchorElem = document.createElement('a');
+    dlAnchorElem.setAttribute('href', dataStr);
+    dlAnchorElem.setAttribute('download', `${quiz.title.replace(/\s+/g, '_')}_Quiz.json`);
+    dlAnchorElem.click();
+  };
+
+  const handleDownloadWorksheetHtml = () => {
+    if (!printHtml || !printingQuiz) return;
+    const blob = new Blob([printHtml], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${printingQuiz.title.replace(/\s+/g, '_')}_Worksheet.html`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleSaveAssignment = async () => {
     if (!assigningQuiz) return;
     setAssigning(true);
@@ -147,8 +185,8 @@ export const MyQuizzesPage: React.FC<MyQuizzesPageProps> = ({ onNavigate }) => {
           onClick={() => onNavigate('quiz-generator')}
           className="inline-flex items-center gap-2 px-4 py-2 bg-[#1B2A4A] text-white text-xs sm:text-sm font-semibold rounded-xl hover:bg-[#15223c] shadow-xs transition-colors self-start sm:self-auto"
         >
-          <Sparkles className="w-4 h-4 text-amber-300" />
-          <span>New AI Quiz</span>
+          <FolderUp className="w-4 h-4 text-amber-300" />
+          <span>Create / Import Quiz</span>
         </button>
       </div>
 
@@ -259,6 +297,15 @@ export const MyQuizzesPage: React.FC<MyQuizzesPageProps> = ({ onNavigate }) => {
                     <Clock className="w-3.5 h-3.5 text-stone-400" />
                     <span>{quiz.timeLimit ? `${quiz.timeLimit}m` : 'Untimed'}</span>
                   </span>
+                  {quiz.attachments && quiz.attachments.length > 0 && (
+                    <>
+                      <span>•</span>
+                      <span className="flex items-center gap-1 text-emerald-700 font-semibold" title="Attached Reference Material">
+                        <Paperclip className="w-3 h-3" />
+                        <span>{quiz.attachments.length} Attachment{quiz.attachments.length > 1 ? 's' : ''}</span>
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -271,6 +318,20 @@ export const MyQuizzesPage: React.FC<MyQuizzesPageProps> = ({ onNavigate }) => {
                     title="Preview Quiz Questions"
                   >
                     <Eye className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => handlePrintPaper(quiz)}
+                    className="p-1.5 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors text-stone-600"
+                    title="Print Exam Worksheet & Answer Key"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => handleExportQuizJson(quiz)}
+                    className="p-1.5 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors text-stone-600"
+                    title="Export Quiz JSON (LMS / Canvas)"
+                  >
+                    <Download className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => handleDuplicate(quiz)}
@@ -325,8 +386,8 @@ export const MyQuizzesPage: React.FC<MyQuizzesPageProps> = ({ onNavigate }) => {
         <EmptyState
           icon={CheckSquare}
           title="No quizzes match criteria"
-          description="Try adjusting your filters or generate a new quiz from your course notes."
-          actionText="Create AI Quiz"
+          description="Try adjusting your filters or build a new quiz manually or via folder import."
+          actionText="Create or Import Quiz"
           onAction={() => onNavigate('quiz-generator')}
         />
       )}
@@ -434,6 +495,65 @@ export const MyQuizzesPage: React.FC<MyQuizzesPageProps> = ({ onNavigate }) => {
           >
             Close
           </button>
+        </div>
+      </Modal>
+
+      {/* Printable Exam Paper & Worksheet Modal */}
+      <Modal
+        isOpen={printHtml !== null}
+        onClose={() => setPrintHtml(null)}
+        title={printingQuiz ? `${printingQuiz.title} — Printable Worksheet` : 'Printable Exam Paper'}
+        subtitle="Formatted A4 classroom assessment ready for paper distribution or PDF export"
+        maxWidth="3xl"
+      >
+        <div className="space-y-4">
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-between text-xs text-blue-900">
+            <div className="flex items-center gap-2">
+              <Printer className="w-4 h-4 text-blue-600" />
+              <span>Includes student header fields, formatted question choices, and instructor answer key.</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleDownloadWorksheetHtml}
+                className="px-3 py-1.5 bg-white border border-blue-300 text-blue-800 rounded-lg font-bold hover:bg-blue-100 flex items-center gap-1 shadow-2xs"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Save HTML</span>
+              </button>
+              <button
+                onClick={() => {
+                  const iframe = document.getElementById('printable-preview-frame') as HTMLIFrameElement;
+                  if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.print();
+                  }
+                }}
+                className="px-3 py-1.5 bg-[#1B2A4A] text-white rounded-lg font-bold hover:bg-[#15223c] flex items-center gap-1 shadow-2xs"
+              >
+                <Printer className="w-3.5 h-3.5 text-amber-300" />
+                <span>Print Document</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="border border-stone-300 rounded-xl overflow-hidden bg-white shadow-xs">
+            {printHtml && (
+              <iframe
+                id="printable-preview-frame"
+                srcDoc={printHtml}
+                title="Print Preview"
+                className="w-full h-[60vh] border-0"
+              />
+            )}
+          </div>
+
+          <div className="flex justify-end pt-2">
+            <button
+              onClick={() => setPrintHtml(null)}
+              className="px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold rounded-xl"
+            >
+              Close Preview
+            </button>
+          </div>
         </div>
       </Modal>
     </div>

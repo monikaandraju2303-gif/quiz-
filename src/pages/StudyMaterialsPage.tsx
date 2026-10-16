@@ -4,6 +4,7 @@ import {
   UploadCloud,
   FileCheck,
   AlertCircle,
+  FolderUp,
   Sparkles,
   Trash2,
   Eye,
@@ -13,12 +14,16 @@ import {
   Loader2,
   FileCode,
   Image as ImageIcon,
+  Paperclip,
+  Download,
+  Copy,
+  Layers,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { materialsService } from '../services/materialsService';
 import { classesService } from '../services/classesService';
 import { api, ExtractedFileResult } from '../services/api';
-import { Classroom, StudyMaterial } from '../types';
+import { Classroom, StudyMaterial, AttachmentItem } from '../types';
 import { Modal } from '../components/common/Modal';
 import { EmptyState } from '../components/common/EmptyState';
 
@@ -49,6 +54,9 @@ export const StudyMaterialsPage: React.FC<StudyMaterialsPageProps> = ({ onNaviga
 
   // Preview Modal
   const [previewMaterial, setPreviewMaterial] = useState<StudyMaterial | null>(null);
+  const [generatingRefForId, setGeneratingRefForId] = useState<string | null>(null);
+  const [previewTab, setPreviewTab] = useState<'text' | 'attachments'>('text');
+  const [copiedNote, setCopiedNote] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const teacherId = userProfile?.uid || 'demo_teacher_42';
@@ -176,6 +184,39 @@ export const StudyMaterialsPage: React.FC<StudyMaterialsPageProps> = ({ onNaviga
     });
   };
 
+  const handleGenerateReferenceSheet = async (material: StudyMaterial) => {
+    try {
+      setGeneratingRefForId(material.id);
+      const now = new Date().toISOString();
+      const attachment: AttachmentItem = {
+        id: `att_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        name: `${material.title} Study Reference Sheet`,
+        type: 'formula_sheet',
+        content: `Academic Reference Guide: ${material.title}\nSubject: ${material.subject}\n\nKey Concepts & Source Notes:\n----------------------------------------\n${material.extractedText.slice(0, 4000)}`,
+        size: `${Math.max(1, Math.round(material.extractedText.length / 1024))} KB`,
+        dateAdded: now,
+      };
+      await materialsService.addAttachment(material.id, attachment);
+      await loadData();
+    } catch (err: any) {
+      console.error('Failed to create reference sheet:', err);
+    } finally {
+      setGeneratingRefForId(null);
+    }
+  };
+
+  const handleDownloadText = (filename: string, content: string) => {
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-8">
       {/* Page Header */}
@@ -261,7 +302,7 @@ export const StudyMaterialsPage: React.FC<StudyMaterialsPageProps> = ({ onNaviga
                       Extracting text and structure...
                     </p>
                     <p className="text-[11px] text-blue-700">
-                      Processing document and preparing notes for AI quiz generation.
+                      Processing document and extracting notes for quiz creation.
                     </p>
                   </div>
                 </div>
@@ -389,11 +430,11 @@ export const StudyMaterialsPage: React.FC<StudyMaterialsPageProps> = ({ onNaviga
         </div>
 
         {materials.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {materials.map((item) => (
               <div
                 key={item.id}
-                className="bg-white rounded-2xl border border-stone-200/90 shadow-2xs p-5 flex flex-col justify-between hover:shadow-xs transition-all"
+                className="bg-white rounded-2xl border border-stone-200/90 shadow-2xs p-5 flex flex-col justify-between hover:shadow-xs transition-all notebook-margin-card"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-2">
@@ -415,26 +456,75 @@ export const StudyMaterialsPage: React.FC<StudyMaterialsPageProps> = ({ onNaviga
                   </p>
 
                   <p className="text-xs text-stone-600 line-clamp-3 mt-3 leading-relaxed font-mono text-[11px] bg-stone-50 p-2.5 rounded-lg border border-stone-100">
-                    {item.extractedText.slice(0, 150)}...
+                    {item.extractedText.slice(0, 160)}...
                   </p>
+
+                  {/* Attached Sheets Badge */}
+                  {item.attachments && item.attachments.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {item.attachments.map((att) => (
+                        <span
+                          key={att.id}
+                          className="inline-flex items-center gap-1 text-[10px] font-semibold bg-blue-50 text-blue-800 border border-blue-200/70 px-2 py-0.5 rounded-md"
+                        >
+                          <Paperclip className="w-3 h-3 text-blue-600" />
+                          <span className="truncate max-w-[150px]">{att.name}</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between gap-2">
-                  <button
-                    onClick={() => setPreviewMaterial(item)}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-600 hover:text-stone-900"
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                    <span>View Text</span>
-                  </button>
+                <div className="mt-4 pt-3 border-t border-stone-100 flex flex-col gap-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <button
+                      onClick={() => {
+                        setPreviewMaterial(item);
+                        setPreviewTab('text');
+                      }}
+                      className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-600 hover:text-stone-900"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>View & Attachments</span>
+                    </button>
 
-                  <button
-                    onClick={() => handleLaunchQuiz(item)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 text-xs font-bold rounded-lg transition-colors"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Generate Quiz</span>
-                  </button>
+                    <button
+                      onClick={() => handleDownloadText(`${item.title.replace(/\s+/g, '_')}_Notes.txt`, item.extractedText)}
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-stone-500 hover:text-stone-800 p-1"
+                      title="Download notes file"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      onClick={() => handleGenerateReferenceSheet(item)}
+                      disabled={generatingRefForId === item.id}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-blue-50 text-blue-800 border border-blue-200 hover:bg-blue-100 disabled:opacity-50 text-xs font-bold rounded-lg transition-colors"
+                      title="Generate a cheat sheet and formula reference guide using AI"
+                    >
+                      {generatingRefForId === item.id ? (
+                        <>
+                          <Loader2 className="w-3 h-3 animate-spin text-blue-600" />
+                          <span>Generating...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Paperclip className="w-3 h-3 text-blue-600" />
+                          <span>AI Reference Sheet</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      onClick={() => handleLaunchQuiz(item)}
+                      className="flex-1 inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 text-xs font-bold rounded-lg transition-colors"
+                    >
+                      <Sparkles className="w-3 h-3 text-emerald-600" />
+                      <span>Quiz</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -448,21 +538,107 @@ export const StudyMaterialsPage: React.FC<StudyMaterialsPageProps> = ({ onNaviga
         )}
       </div>
 
-      {/* Extracted Text Full View Modal */}
+      {/* Extracted Text & Attachments Full View Modal */}
       <Modal
         isOpen={previewMaterial !== null}
         onClose={() => setPreviewMaterial(null)}
         title={previewMaterial?.title || 'Extracted Study Notes'}
-        subtitle={`${previewMaterial?.fileName || ''} • ${previewMaterial?.wordCount || 0} words`}
+        subtitle={`${previewMaterial?.fileName || ''} • ${previewMaterial?.wordCount || 0} words • ${previewMaterial?.attachments?.length || 0} attachments`}
         maxWidth="3xl"
       >
         <div className="space-y-4">
-          <div className="max-h-96 overflow-y-auto p-4 bg-stone-50 rounded-xl border border-stone-200 text-xs text-stone-800 font-mono whitespace-pre-wrap leading-relaxed">
-            {previewMaterial?.extractedText}
+          {/* Modal Tabs */}
+          <div className="flex border-b border-stone-200 bg-stone-50/70 p-1 rounded-xl">
+            <button
+              onClick={() => setPreviewTab('text')}
+              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                previewTab === 'text'
+                  ? 'bg-white text-stone-900 shadow-2xs'
+                  : 'text-stone-500 hover:text-stone-800'
+              }`}
+            >
+              Extracted Notes
+            </button>
+            <button
+              onClick={() => setPreviewTab('attachments')}
+              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                previewTab === 'attachments'
+                  ? 'bg-white text-stone-900 shadow-2xs'
+                  : 'text-stone-500 hover:text-stone-800'
+              }`}
+            >
+              <Paperclip className="w-3.5 h-3.5" />
+              <span>Attached Reference Sheets ({previewMaterial?.attachments?.length || 0})</span>
+            </button>
           </div>
+
+          {previewTab === 'text' ? (
+            <div className="max-h-96 overflow-y-auto p-4 bg-stone-50 rounded-xl border border-stone-200 text-xs text-stone-800 font-mono whitespace-pre-wrap leading-relaxed notebook-page">
+              {previewMaterial?.extractedText}
+            </div>
+          ) : (
+            <div className="max-h-96 overflow-y-auto space-y-4">
+              {previewMaterial?.attachments && previewMaterial.attachments.length > 0 ? (
+                previewMaterial.attachments.map((att) => (
+                  <div key={att.id} className="p-4 bg-stone-50 rounded-xl border border-stone-200 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Paperclip className="w-4 h-4 text-blue-600" />
+                        <h4 className="text-xs font-bold text-stone-900">{att.name}</h4>
+                        <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 bg-blue-100 text-blue-800 rounded">
+                          {att.type.replace('_', ' ')}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleDownloadText(`${att.name.replace(/\s+/g, '_')}.txt`, att.content)}
+                        className="p-1 text-stone-500 hover:text-stone-800"
+                        title="Download attachment"
+                      >
+                        <Download className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <pre className="text-xs text-stone-700 font-mono whitespace-pre-wrap p-3 bg-white rounded-lg border border-stone-200 max-h-60 overflow-y-auto leading-relaxed">
+                      {att.content}
+                    </pre>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <Paperclip className="w-8 h-8 text-stone-400 mx-auto mb-2" />
+                  <p className="text-xs font-bold text-stone-700">No reference sheets attached yet</p>
+                  <p className="text-[11px] text-stone-500 mt-1">
+                    Click "AI Reference Sheet" to generate formula and cheat sheets automatically.
+                  </p>
+                  {previewMaterial && (
+                    <button
+                      onClick={() => handleGenerateReferenceSheet(previewMaterial)}
+                      className="mt-3 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700"
+                    >
+                      Generate Reference Sheet Now
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="flex items-center justify-between pt-2">
             <span className="text-xs text-stone-400">Subject: {previewMaterial?.subject}</span>
             <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  if (previewMaterial) {
+                    navigator.clipboard.writeText(previewMaterial.extractedText);
+                    setCopiedNote(true);
+                    setTimeout(() => setCopiedNote(false), 2000);
+                  }
+                }}
+                className="px-3 py-1.5 text-xs font-semibold text-stone-600 hover:text-stone-900 rounded-xl hover:bg-stone-100 flex items-center gap-1"
+              >
+                <Copy className="w-3.5 h-3.5" />
+                <span>{copiedNote ? 'Copied!' : 'Copy Text'}</span>
+              </button>
+
               <button
                 onClick={() => setPreviewMaterial(null)}
                 className="px-4 py-2 text-xs font-semibold text-stone-600 hover:text-stone-900 rounded-xl hover:bg-stone-100"
@@ -477,8 +653,8 @@ export const StudyMaterialsPage: React.FC<StudyMaterialsPageProps> = ({ onNaviga
                   }}
                   className="px-4 py-2 text-xs font-semibold text-white bg-[#1B2A4A] rounded-xl hover:bg-[#15223c] flex items-center gap-1.5"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                  <span>Generate Quiz from this Material</span>
+                  <FolderUp className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Create Quiz with Material</span>
                 </button>
               )}
             </div>
