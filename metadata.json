@@ -1,0 +1,6 @@
+{
+  "name": "EduQuiz AI",
+  "description": "Full-Stack Education Quiz Generator - Turn classroom notes, PDFs, and study materials into interactive quizzes with AI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

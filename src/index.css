@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-ivory: #FBF9F5;
+    --paper-line: rgba(59, 130, 246, 0.05);
+    --paper-grid: rgba(30, 41, 59, 0.035);
+  }
+
+  body {
+    background-color: var(--bg-ivory);
+    color: #1E293B;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Subtle academic notebook grid */
+.academic-grid {
+  background-image: 
+    linear-gradient(to right, var(--paper-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--paper-grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Subtle ruled notebook lines */
+.ruled-paper {
+  background-image: linear-gradient(transparent 95%, var(--paper-line) 95%);
+  background-size: 100% 28px;
+  line-height: 28px;
+}
+
+/* Subtle chalkboard card style */
+.chalkboard-card {
+  background-color: #1A2F2B;
+  color: #F1F5F9;
+  border: 1px solid #284E46;
+}
+
+/* Academic card styling */
+.edu-card {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+}
+
+.edu-card-hover {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.edu-card-hover:hover {
+  border-color: #CBD5E1;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  transform: translateY(-1px);
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}

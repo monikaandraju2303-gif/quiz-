@@ -1,0 +1,146 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with role as teacher or student",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["teacher", "student"] },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Class": {
+      "title": "Class",
+      "description": "Classroom managed by a teacher with enrolled students",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "teacherId": { "type": "string" },
+        "name": { "type": "string" },
+        "subject": { "type": "string" },
+        "grade": { "type": "string" },
+        "section": { "type": "string" },
+        "description": { "type": "string" },
+        "joinCode": { "type": "string" },
+        "studentIds": { "type": "array" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["teacherId", "name", "subject", "joinCode"]
+    },
+    "Material": {
+      "title": "Material",
+      "description": "Study material or uploaded notes extracted for quiz generation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "classId": { "type": "string" },
+        "title": { "type": "string" },
+        "subject": { "type": "string" },
+        "fileName": { "type": "string" },
+        "mimeType": { "type": "string" },
+        "storagePath": { "type": "string" },
+        "extractedText": { "type": "string" },
+        "processingStatus": { "type": "string", "enum": ["processing", "completed", "failed"] },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["ownerId", "title", "subject", "processingStatus"]
+    },
+    "Quiz": {
+      "title": "Quiz",
+      "description": "Generated or curated quiz for assessment and practice",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "teacherId": { "type": "string" },
+        "classId": { "type": "string" },
+        "materialIds": { "type": "array" },
+        "title": { "type": "string" },
+        "subject": { "type": "string" },
+        "topic": { "type": "string" },
+        "difficulty": { "type": "string", "enum": ["easy", "medium", "hard"] },
+        "questionCount": { "type": "number" },
+        "totalMarks": { "type": "number" },
+        "timeLimit": { "type": "number" },
+        "maxAttempts": { "type": "number" },
+        "status": { "type": "string", "enum": ["draft", "published", "archived"] },
+        "scheduledStart": { "type": "string" },
+        "scheduledEnd": { "type": "string" },
+        "questions": { "type": "array" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["teacherId", "title", "subject", "difficulty", "status"]
+    },
+    "Attempt": {
+      "title": "Attempt",
+      "description": "Student quiz attempt with answers and scoring",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "quizId": { "type": "string" },
+        "studentId": { "type": "string" },
+        "studentName": { "type": "string" },
+        "studentEmail": { "type": "string" },
+        "classId": { "type": "string" },
+        "answers": { "type": "array" },
+        "score": { "type": "number" },
+        "totalMarks": { "type": "number" },
+        "percentage": { "type": "number" },
+        "startedAt": { "type": "string" },
+        "submittedAt": { "type": "string" },
+        "status": { "type": "string", "enum": ["in-progress", "submitted"] },
+        "timeTaken": { "type": "number" }
+      },
+      "required": ["quizId", "studentId", "status"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "User notification for quizzes and class updates",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "message": { "type": "string" },
+        "type": { "type": "string" },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["userId", "title", "message", "read"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile with role and settings"
+    },
+    "/classes/{classId}": {
+      "schema": "Class",
+      "description": "Classrooms managed by teachers with enrolled students"
+    },
+    "/materials/{materialId}": {
+      "schema": "Material",
+      "description": "Study materials and extracted notes"
+    },
+    "/quizzes/{quizId}": {
+      "schema": "Quiz",
+      "description": "Educational quizzes generated or authored by teachers"
+    },
+    "/attempts/{attemptId}": {
+      "schema": "Attempt",
+      "description": "Student attempts and grading results"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "Notifications for users"
+    }
+  }
+}
